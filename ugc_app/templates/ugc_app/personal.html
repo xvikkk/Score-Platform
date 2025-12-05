@@ -1,0 +1,66 @@
+{% extends 'ugc_app/base.html' %}
+
+{% block title %}{{ profile_user.username }}的个人主页 - UGC平台{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 text-center">
+        <div class="card">
+            <div class="card-body">
+                {% if user_profile.profile_photo %}
+                <img src="{{ user_profile.profile_photo.url }}" class="profile-photo mb-3" alt="头像">
+                {% else %}
+                <div
+                    class="profile-photo bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
+                    <span class="text-white fs-1">{{ profile_user.username|first|upper }}</span>
+                </div>
+                {% endif %}
+
+                <h3>@{{ profile_user.username }}</h3>
+
+                {% if user_profile.bio %}
+                <p class="text-muted">{{ user_profile.bio }}</p>
+                {% else %}
+                <p class="text-muted">这个人很懒，什么都没有写...</p>
+                {% endif %}
+
+                <div class="mt-3">
+                    <span class="badge bg-primary">内容: {{ ugc_items.count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <h3 class="mb-4">我的内容</h3>
+
+        {% for item in ugc_items %}
+        <div class="card mb-3">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ item.image.url }}" class="img-fluid rounded-start" alt="内容图片"
+                        style="height: 200px; width: 100%; object-fit: cover;">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <p class="card-text">{{ item.content }}</p>
+                        <p class="card-text">
+                            <small class="text-muted">{{ item.post_time|date:"Y-m-d H:i" }}</small>
+                        </p>
+                        <div>
+                            <span class="badge bg-primary">评分: {{ item.scored|floatformat:1 }}</span>
+                            <span class="badge bg-secondary">评论: {{ item.discussion_count }}</span>
+                        </div>
+                        <a href="{% url 'ugc_detail' item.id %}" class="btn btn-sm btn-outline-primary mt-2">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info text-center">
+            <p>还没有发布任何内容，<a href="{% url 'upload' %}" class="alert-link">立即上传第一个内容吧！</a></p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

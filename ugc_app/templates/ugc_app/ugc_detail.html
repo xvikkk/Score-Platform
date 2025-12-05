@@ -1,0 +1,111 @@
+{% extends 'ugc_app/base.html' %}
+
+{% block title %}内容详情 - UGC平台{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <img src="{{ ugc_item.image.url }}" class="card-img-top" alt="内容图片">
+            <div class="card-body">
+                <p class="card-text">{{ ugc_item.content }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <a href="{% url 'personal' ugc_item.user.username %}" class="text-decoration-none">
+                            @{{ ugc_item.user.username }}
+                        </a>
+                    </small>
+                    <small class="text-muted">{{ ugc_item.post_time|date:"Y-m-d H:i" }}</small>
+                </div>
+                <div class="mt-2">
+                    <span class="badge bg-primary">平均评分: {{ ugc_item.scored|floatformat:1 }}</span>
+                    <span class="badge bg-secondary">评论数: {{ ugc_item.discussion_count }}</span>
+                    <span class="badge bg-info">热度: {{ ugc_item.hot|floatformat:1 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论区域 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>评论 ({{ discussions|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_discussion' ugc_item.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea name="content" class="form-control" rows="3" placeholder="写下你的评论..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">发表评论</button>
+                </form>
+                <hr>
+                {% endif %}
+
+                {% for discussion in discussions %}
+                <div class="mb-3 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between">
+                        <strong>
+                            <a href="{% url 'personal' discussion.user.username %}" class="text-decoration-none">
+                                @{{ discussion.user.username }}
+                            </a>
+                        </strong>
+                        <small class="text-muted">{{ discussion.comment_time|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    <p class="mb-0 mt-1">{{ discussion.content }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">还没有评论，成为第一个评论的人吧！</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- 评分区域 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>评分</h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                {% if user_rating %}
+                <p>您已评分: <span class="badge bg-primary">{{ user_rating.score }} 分</span></p>
+                {% endif %}
+
+                <form method="post" action="{% url 'rate_ugc' ugc_item.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">选择评分 (1-5分):</label>
+                        <select name="score" class="form-select">
+                            <option value="1">1分</option>
+                            <option value="2">2分</option>
+                            <option value="3">3分</option>
+                            <option value="4">4分</option>
+                            <option value="5">5分</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        {% if user_rating %}更新评分{% else %}提交评分{% endif %}
+                    </button>
+                </form>
+                {% else %}
+                <p class="text-muted">请<a href="{% url 'login' %}">登录</a>后评分</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>统计信息</h5>
+            </div>
+            <div class="card-body">
+                <p>总评分人数: {{ ugc_item.rating_count }}</p>
+                <p>总评论数: {{ ugc_item.discussion_count }}</p>
+                <p>历史热度: {{ ugc_item.top|floatformat:1 }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

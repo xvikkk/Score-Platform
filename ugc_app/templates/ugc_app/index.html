@@ -1,0 +1,67 @@
+{% extends 'ugc_app/base.html' %}
+
+{% block title %}首页 - UGC平台{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">最新内容</h1>
+            
+            <!-- 排序选择器 -->
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if current_sort == 'time' %}
+                        按时间排序
+                    {% elif current_sort == 'hot' %}
+                        按实时热度排序
+                    {% elif current_sort == 'top' %}
+                        按历史热度排序
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item {% if current_sort == 'time' %}active{% endif %}" href="?sort=time">按时间排序</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'hot' %}active{% endif %}" href="?sort=hot">按实时热度排序</a></li>
+                    <li><a class="dropdown-item {% if current_sort == 'top' %}active{% endif %}" href="?sort=top">按历史热度排序</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for item in ugc_items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card ugc-card">
+            <img src="{{ item.image.url }}" class="card-img-top" alt="UGC图片" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <p class="card-text">{{ item.content|truncatewords:20 }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <a href="{% url 'personal' item.user.username %}" class="text-decoration-none">
+                            @{{ item.user.username }}
+                        </a>
+                    </small>
+                    <small class="text-muted">{{ item.post_time|date:"Y-m-d H:i" }}</small>
+                </div>
+                <div class="mt-2">
+                    <span class="badge bg-primary">评分: {{ item.scored|floatformat:1 }}</span>
+                    <span class="badge bg-secondary">评论: {{ item.discussion_count }}</span>
+                    <span class="badge bg-info">热度: {{ item.hot|floatformat:1 }}</span>
+                    <span class="badge bg-warning text-dark">历史: {{ item.top|floatformat:1 }}</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'ugc_detail' item.id %}" class="btn btn-sm btn-outline-primary">查看详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <p>还没有任何内容，<a href="{% url 'upload' %}" class="alert-link">成为第一个上传内容的人吧！</a></p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
